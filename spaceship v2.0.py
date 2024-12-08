@@ -3,7 +3,7 @@ import random
 from pathlib import Path
 
 ROOT_DIR = str(Path(__file__).parent)
-WIDTH, HEIGHT = 800, 800  # Adjusted window size to fit the entire game
+WIDTH, HEIGHT = 800, 800
 FPS = 20
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -12,23 +12,19 @@ GREEN = (0, 255, 0)
 BLUE = (0, 0, 255)
 YELLOW = (255, 255, 0)
 
-# Initialize Pygame
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Space Shooter Enhanced")
 clock = pygame.time.Clock()
 
-# Load spaceship, enemy, and power-up images
 SPACESHIP_IMG = pygame.image.load(ROOT_DIR+"\\spaceship.png")
 ENEMY_IMG = pygame.image.load(ROOT_DIR+"\\enemy.png")
 POWER_UP_IMG = pygame.image.load(ROOT_DIR+"\\powerup.png")
 
-# Resize the images to smaller sizes
-SPACESHIP_IMG = pygame.transform.scale(SPACESHIP_IMG, (50, 50))  # Space ship 50x50
-ENEMY_IMG = pygame.transform.scale(ENEMY_IMG, (40, 40))  # Enemy 40x40
-POWER_UP_IMG = pygame.transform.scale(POWER_UP_IMG, (30, 30))  # Power-up 30x30
+SPACESHIP_IMG = pygame.transform.scale(SPACESHIP_IMG, (50, 50))
+ENEMY_IMG = pygame.transform.scale(ENEMY_IMG, (40, 40))
+POWER_UP_IMG = pygame.transform.scale(POWER_UP_IMG, (30, 30))
 
-# Spaceship class
 class Spaceship:
     def __init__(self):
         self.image = SPACESHIP_IMG
@@ -36,10 +32,10 @@ class Spaceship:
         self.speed = 5
         self.health = 3
         self.bullets = []
-        self.double_bullet = False  # Power-up flag
-        self.shield = False  # Shield power-up flag
-        self.shield_timer = 0  # Timer for shield effect
-        self.double_bullet_timer = 0  # Timer for double bullet effect
+        self.double_bullet = False
+        self.shield = False
+        self.shield_timer = 0
+        self.double_bullet_timer = 0
 
     def move(self, keys):
         if keys[pygame.K_LEFT] and self.rect.left > 0:
@@ -61,7 +57,6 @@ class Spaceship:
     def draw(self, surface):
         surface.blit(self.image, self.rect)
         if self.shield:
-            # Draw a blue circle around the spaceship if shield is active
             pygame.draw.circle(surface, BLUE, self.rect.center, self.rect.width // 2 + 5, 2)
         for bullet in self.bullets:
             bullet.draw(surface)
@@ -74,7 +69,6 @@ class Spaceship:
 
     def take_damage(self):
         if self.shield:
-            # Shield prevents damage
             return True
         self.health -= 1
         if self.health <= 0:
@@ -92,7 +86,6 @@ class Spaceship:
         else:
             self.double_bullet = False
 
-# Bullet class
 class Bullet:
     def __init__(self, x, y):
         self.rect = pygame.Rect(x - 5, y, 10, 20)
@@ -104,7 +97,6 @@ class Bullet:
     def draw(self, surface):
         pygame.draw.rect(surface, BLUE, self.rect)
 
-# Enemy class
 class Enemy:
     def __init__(self):
         self.image = ENEMY_IMG
@@ -119,7 +111,6 @@ class Enemy:
     def draw(self, surface):
         surface.blit(self.image, self.rect)
 
-# Power-up class
 class PowerUp:
     def __init__(self):
         self.image = POWER_UP_IMG
@@ -134,7 +125,6 @@ class PowerUp:
     def draw(self, surface):
         surface.blit(self.image, self.rect)
 
-# Main function
 def main():
     running = True
     spaceship = Spaceship()
@@ -142,28 +132,24 @@ def main():
     power_ups = []
     score = 0
 
-    font = pygame.font.SysFont(None, 30)  # Reduced font size to fit the game window
+    font = pygame.font.SysFont(None, 30)
 
     while running:
         screen.fill(WHITE)
         keys = pygame.key.get_pressed()
 
-        # Event handling
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 spaceship.shoot()
 
-        # Spawn power-ups randomly
         if random.random() < 0.01:
             power_ups.append(PowerUp())
 
-        # Update spaceship and bullets
         spaceship.move(keys)
         spaceship.update_bullets()
 
-        # Update enemies
         for enemy in enemies[:]:
             enemy.move()
             if enemy.rect.top > HEIGHT:
@@ -180,35 +166,30 @@ def main():
                     enemies.append(Enemy())
                     score += 1
 
-        # Update power-ups
         for power_up in power_ups[:]:
             power_up.move()
             if power_up.rect.colliderect(spaceship.rect):
                 if power_up.type == "double_bullet":
                     spaceship.double_bullet = True
-                    spaceship.double_bullet_timer = 300  # lasts for 300 frames
+                    spaceship.double_bullet_timer = 300
                 elif power_up.type == "shield":
                     spaceship.shield = True
-                    spaceship.shield_timer = 300  # lasts for 300 frames
+                    spaceship.shield_timer = 300
                 power_ups.remove(power_up)
 
-        # Update power-up timers
         spaceship.update_power_up_timers()
 
-        # Draw everything
         spaceship.draw(screen)
         for enemy in enemies:
             enemy.draw(screen)
         for power_up in power_ups:
             power_up.draw(screen)
 
-        # Display score and health
         score_text = font.render(f"Score: {score}", True, BLACK)
         health_text = font.render(f"Health: {spaceship.health}", True, RED)
         screen.blit(score_text, (10, 10))
         screen.blit(health_text, (10, 40))
 
-        # Display power-up timers
         if spaceship.shield:
             shield_time_text = font.render(f"Shield: {spaceship.shield_timer // FPS} sec", True, GREEN)
             screen.blit(shield_time_text, (WIDTH - 150, 10))
